@@ -1,6 +1,6 @@
 import { Component } from "react";
-import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import authService from "../../service/auth-service";
 
 
 type Props = {};
@@ -9,18 +9,24 @@ type State = {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    successful: boolean,
+    message: string
 };
 
-export default class Auth extends Component{
+export default class Register extends Component<Props, State>{
+
     constructor(props: Props){
         super(props);
+        this.handleRegister = this.handleRegister.bind(this);
 
         this.state = {
             firstName: "",
             lastName: "",
             email: "",
-            password : ""
+            password : "",
+            successful: false,
+            message: ""
         };
     }
     validation(){
@@ -63,5 +69,40 @@ export default class Auth extends Component{
             message: "",
             successful: false
         });
+        authService.register(
+            email,
+            password,
+            firstName,
+            lastName
+        ).then(
+            response => {
+                this.setState({
+                    message : response.data.message,
+                    successful: true
+                });
+            },
+            error => {
+                const resMessage = 
+                    (error.response &&
+                        error.response.data &&
+                        error.response.data.message) ||
+                    error.message ||
+                    error.toString();
+            
+                    this.setState({
+                    successful: false,
+                    message: resMessage
+                    });
+            }
+        );
     }
+    /**
+     * 
+     * UI
+    render (){
+        return (
+            // Add UI
+        );
+    }
+     */
 }
